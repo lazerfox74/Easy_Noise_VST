@@ -9,12 +9,13 @@
 */
 
 #pragma once
-
+//class for my one pole filter
 class myOnePole
 {
 public:
     float process(float in, float damp);
 
 private:
+    //value for storing the previous value of my onePole filter
     float z;
 };

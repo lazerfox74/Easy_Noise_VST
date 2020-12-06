@@ -13,6 +13,7 @@
 
 //==============================================================================
 EasyNoiseAudioProcessor::EasyNoiseAudioProcessor()
+//setting up my audioProcessorValueTreeSate before the constructor
     : parameters(*this, nullptr, juce::Identifier("easyNoise"),
         {
             std::make_unique<juce::AudioParameterFloat>(NOISEFILT_ID,     // parameterID
@@ -164,34 +165,27 @@ void EasyNoiseAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuff
     auto totalNumInputChannels  = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
 
-    // In case we have more outputs than inputs, this code clears any output
-    // channels that didn't contain input data, (because these aren't
-    // guaranteed to be empty - they may contain garbage).
-    // This is here to avoid people getting screaming feedback
-    // when they first compile a plugin, but obviously you don't need to keep
-    // this code if your algorithm always overwrites all the output channels.
-    for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
-        buffer.clear (i, 0, buffer.getNumSamples());
 
-  
-    float* Lchannel = buffer.getWritePointer(0);
-    float* Rchannel = buffer.getWritePointer(1);
-
+    //array of buffer write pointers for my left and right channels
     float* chanelPointArray[2];
 
     for (int sample = 0; sample < buffer.getNumSamples(); sample++)
     {
+        //only generating a new random noise depending on if my bitRateCount modulo my bit rate amount is 0 to reduce bit rate
         if ((bitRateCount % (int)floor(*bitRatePointer)) == 0)
-        {
+        {   
+            //one pole processed random noise
             noise = onePole(((rand() % 200) / 100.0f - 1.0f), *noiseFiltPointer) * *noiseAmtPointer;
             bitRateCount = 0;
         }
 
         for (int channel = 0; channel < totalNumInputChannels; channel++)
         {
+            //taking the input sample and multiplying it by the noise sample for the left and right channels
             chanelPointArray[channel] = buffer.getWritePointer(channel);
             float newSample{ (chanelPointArray[channel][sample] * *gainAmtPointer) * (1 + noise)};
-            //hard clipping
+
+            //hard clipping if sample is above 1/below -1
             if (newSample > 1.0f) { newSample = 1.0; } else if (newSample < -1.0f) { newSample = -1.0f;}
 
             chanelPointArray[channel][sample] = newSample;
@@ -199,26 +193,6 @@ void EasyNoiseAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuff
 
         bitRateCount++;
     }
-
-
-    //for (int sample = 0; sample < buffer.getNumSamples(); sample++)
-    //{
-
-    //    Lchannel[sample] = Lchannel[sample] * (1 + noise);
-    //    Rchannel[sample] = Rchannel[sample] * (1 + noise);
-    //}
-
-
-    //for (int channel = 0; channel < totalNumInputChannels; ++channel)
-    //{
-    //    float* channelData = buffer.getWritePointer (channel);
-
-    //    for (int sample = 0; sample < buffer.getNumSamples(); sample++)
-    //    {
-    //        channelData[sample] = 
-    //    }
-    //}
-
 }
 
 //==============================================================================
@@ -235,9 +209,8 @@ AudioProcessorEditor* EasyNoiseAudioProcessor::createEditor()
 //==============================================================================
 void EasyNoiseAudioProcessor::getStateInformation (MemoryBlock& destData)
 {
-    // You should use this method to store your parameters in the memory block.
-    // You could do that either as raw data, or use the XML or ValueTree classes
-    // as intermediaries to make it easy to save and load complex data.
+
+    //storing my paramaters to and XML file in meory
     juce::ValueTree state = parameters.copyState();
     std::unique_ptr<juce::XmlElement> xml(state.createXml());
     copyXmlToBinary(*xml, destData);
@@ -245,8 +218,7 @@ void EasyNoiseAudioProcessor::getStateInformation (MemoryBlock& destData)
 
 void EasyNoiseAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
-    // You should use this method to restore your parameters from this memory block,
-    // whose contents will have been created by the getStateInformation() call.
+    //restoring my paramaters based on the XML file in memory
     std::unique_ptr<juce::XmlElement> xmlState(getXmlFromBinary(data, sizeInBytes));
 
     if (xmlState.get() != nullptr)
@@ -256,10 +228,11 @@ void EasyNoiseAudioProcessor::setStateInformation (const void* data, int sizeInB
 
 float EasyNoiseAudioProcessor::onePole(float in,float damp)
 {
-    float a = damp;
-    float b = 1 -damp;
-    z = (in * a) + (z * b);
-    return z;
+    
+    //controlling how much the raw signal effects the output of the sound
+    int a = damp;
+    int b = 1 - damp;
+    return z = (in * a) + (z * b);
 }
 
 

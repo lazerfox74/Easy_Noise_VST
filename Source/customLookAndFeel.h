@@ -10,7 +10,7 @@
 
 #pragma once
 #include <JuceHeader.h>
-
+//custom look and feel class for drawing the dials in my UI
 class customLookAndFeel : public LookAndFeel_V4
 {
 public:

@@ -62,18 +62,15 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EasyNoiseAudioProcessor)
 
     juce::AudioProcessorValueTreeState parameters;
-
+    //pointers that will be set to the values in my XML file
     std::atomic<float>* noiseFiltPointer = nullptr;
     std::atomic<float>* noiseAmtPointer = nullptr;
     std::atomic<float>* gainAmtPointer = nullptr;
     std::atomic<float>* bitRatePointer = nullptr;
 
-
+    //One pole function for dampening the noise
     float onePole(float in,float damp);
+    //noise float and z float for storing the previous value from the one pole
     float z{ 0.0f }, noise{0.0f};
     int bitRateCount{1};
-
-    myOnePole onePoleArray[2];
-
-    //make array of one poles for left and right channel
 };

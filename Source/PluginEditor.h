@@ -14,6 +14,8 @@
 #include "PluginProcessor.h"
 #include "customLookAndFeel.h"
 
+//IDS for my strings used in the AudioProcessorValueTreeState object
+
 #define NOISEFILT_ID "noiseFilt"
 #define NOISEFILT_NAME "Noise Filter"
 
@@ -26,6 +28,8 @@
 #define BITRATE_ID "bitRate"
 #define BITRATE_NAME "Bit Rate"
 
+//types of AudioProcessorValueTree Objects
+
 typedef juce::AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
 typedef juce::AudioProcessorValueTreeState::ButtonAttachment ButtonAttachment;
 
@@ -33,9 +37,10 @@ typedef juce::AudioProcessorValueTreeState::ButtonAttachment ButtonAttachment;
 //==============================================================================
 /**
 */
-class EasyNoiseAudioProcessorEditor  : public AudioProcessorEditor, juce::Slider::Listener
+class EasyNoiseAudioProcessorEditor  : public AudioProcessorEditor
 {
 public:
+    //feeding my editor reference to the processor and value tree when constructed
     EasyNoiseAudioProcessorEditor(EasyNoiseAudioProcessor&, juce::AudioProcessorValueTreeState& vts);
     ~EasyNoiseAudioProcessorEditor();
 
@@ -43,19 +48,19 @@ public:
     void paint (Graphics&) override;
     void resized() override;
 
-    void sliderValueChanged(Slider* slider) override;
-
 private:
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
     EasyNoiseAudioProcessor& processor;
 
-    //sliders
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EasyNoiseAudioProcessorEditor)
 
+    //reference to AudioProcessorValueTreeState  so it can be set to the valueTree in the plugin processor when constructed
+
     juce::AudioProcessorValueTreeState& valueTreeState;
 
+    //Sliders and slider attatchments
     juce::Slider noiseFiltSlider;
     std::unique_ptr<SliderAttachment> noiseFiltAttatchment;
 
@@ -67,9 +72,9 @@ private:
 
     juce::Slider bitRateSlider;
     std::unique_ptr<SliderAttachment> bitRateAttatchment;
-
+    //my custom look and feel class
     customLookAndFeel otherLookAndFeel;
-
+    //image for use in the background
     Image backGround;
 
 };
